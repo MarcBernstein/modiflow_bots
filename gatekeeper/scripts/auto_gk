@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# Get full path to auto_gk script's directory, works when run from any dir
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+GATEKEEPER_PATH="${SCRIPT_DIR}/.."
+
+# Generate at https://github.com/settings/tokens
+GH_TOKEN=''
+
+# org/repo
+REPO=''
+
+if [ "$#" -ne 1 ] ;
+        then
+        echo "Usage: auto_gk [current_version]"
+        exit 1
+fi
+
+VERSION=$1
+
+if [ -z "${GH_TOKEN}" ]; then
+        echo "GH_TOKEN variable is not set."
+        exit 1
+fi
+
+if [ -z "${REPO}" ]; then
+        echo "REPO variable is not set."
+        exit 1
+fi
+
+ruby "$GATEKEEPER_PATH/gatekeeper.rb" \
+        --token "$GH_TOKEN" \
+        --repo "$REPO" \
+        --release "RC-$VERSION" \
+        --title "Release Candidate v$VERSION" \
+
+ruby "$GATEKEEPER_PATH/rc_infotizer.rb" \
+        --token "$GH_TOKEN" \
+        --repo "$REPO" \
+        --release "RC-$VERSION"
